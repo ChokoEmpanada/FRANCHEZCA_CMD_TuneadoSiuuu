@@ -57,6 +57,8 @@ public class Sub_Chasis extends SubsystemBase {
     SmartDashboard.putNumber("encoderizquierdo", getLeftEncoder());
     SmartDashboard.putNumber("encoderderecho", getRightEncoder());
     SmartDashboard.putNumber("Yaw", ahrs.getYaw());
+    SmartDashboard.putNumber("RightSpeed", MasterRightMotor.get());
+    SmartDashboard.putNumber("LeftSpeed", MasterLeftMotor.get());
     Volts = RobotController.getBatteryVoltage();
     
   }

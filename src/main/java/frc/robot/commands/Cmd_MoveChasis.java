@@ -8,8 +8,8 @@ public class Cmd_MoveChasis extends CommandBase {
   private final Sub_Chasis Chasis;
   private double Setpoint, Dt, LastDt, I_Zone;
   private double RightErrorP, RightErrorI, RightErrorD, RightLastError, RightSpeed;
-  private double LeftErrorP, LeftErrorI, LeftErrorD, LeftLastError, LeftSpeed;
-  private double kP, kI, kD;
+  private double LeftErrorP, LeftErrorI, LeftErrorD, LeftLastError, LeftSpeed, ErrorTeta;
+  private double kP, kI, kD, kT;
 
   //Constructor
   public Cmd_MoveChasis(Sub_Chasis sub_Chasis, double setpoint) {
@@ -23,15 +23,19 @@ public class Cmd_MoveChasis extends CommandBase {
   public void initialize() {
     //Reinicio e inicializacion de variables
     resetAll();
-    kP = 0.017; kI = 0.01; kD = 0.0022;
+    kP = 0.017; kI = 0.01; kD = 0.0022; kT=0.001;
     Chasis.resetEncoders();
     Chasis.CalibrateMaxVoltage();
     Chasis.SetOpenLoopedS(1);
+    Chasis.resetYaw();
+    System.out.println("CMD MOVE");
+    
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    
     //Delta de tiempo
     Dt = Timer.getFPGATimestamp() - LastDt;
 
@@ -39,7 +43,10 @@ public class Cmd_MoveChasis extends CommandBase {
     RightErrorP = Setpoint - Chasis.getRightEncoder();
     LeftErrorP = Setpoint  - Chasis.getLeftEncoder();
 
-    
+    //angulo
+    ErrorTeta=Chasis.getYaw();
+
+
     //I
     if(Math.abs(RightErrorP) <= I_Zone){ RightErrorI += RightErrorP * Dt; }else{ RightErrorI = 0; }
     if(Math.abs(LeftErrorP) <= I_Zone){ LeftErrorI += LeftErrorP * Dt; }else{ LeftErrorI = 0; }
@@ -49,8 +56,8 @@ public class Cmd_MoveChasis extends CommandBase {
     LeftErrorD = (LeftErrorP-LeftLastError)/Dt;
 
     //Control de velocidad
-    RightSpeed = (RightErrorP * kP) + (RightErrorI * kI) + (RightErrorD * kD);
-    LeftSpeed = (LeftErrorP * kP) + (LeftErrorI * kI) + (LeftErrorD * kD);
+    RightSpeed = (RightErrorP * kP) + (RightErrorI * kI) + (RightErrorD * kD)-(ErrorTeta * kT);
+    LeftSpeed = (LeftErrorP * kP) + (LeftErrorI * kI) + (LeftErrorD * kD)+(ErrorTeta * kT);
 
     //Set a los motores
     Chasis.setSpeed(RightSpeed, LeftSpeed);

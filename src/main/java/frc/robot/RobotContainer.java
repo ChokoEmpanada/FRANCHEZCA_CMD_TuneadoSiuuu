@@ -23,20 +23,11 @@ public class RobotContainer {
 
 
   private void configureBindings() {
-    ChasisControl.a().whileTrue(new Cmd_VisionAlign(chasis));
+    ChasisControl.a().whileTrue(new Cmd_MoveChasis(chasis, 100));
     //ChasisControl.y().whileTrue(new Cmd_gyro(chasis,90.0));
   }
 
   public Command getAutonomousCommand() {
-    return new SequentialCommandGroup(
-      new Cmd_MoveChasis(chasis, -15),
-      new Cmd_gyro(chasis, 180),
-      new Cmd_MoveChasis(chasis, 200),
-      new Cmd_gyro(chasis,-180),
-      new Cmd_MoveChasis(chasis, 150),
-      new Cmd_VisionAlign(chasis),
-      new Cmd_MoveChasis(chasis, -15),
-      new Cmd_gyro(chasis, 180)
-    );
+    return new Cmd_MoveChasis(chasis, 100);
   }
 }
